@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<head>
+  <title>US VA Spend Data by state using D3</title>
+
+  <!--- *********************************************************
+        *********************************************************
+
+        Borrowing code from examp
+
+        documentation at http://d3js.org/
+        
+        *********************************************************
+        ********************************************************* -->
+
+
+
+<!--- Using d3 for visualization -->
+<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="http://d3js.org/topojson.v1.min.js"></script>
+<script type='text/javascript' src='selectable.js'></script>
+<script type="text/javascript" src="d3.tip.min.js"></script>
+</head>
+
+
+
+<!-- The actual webpage domain is really simple- all the fun stuff happens after, in js -->
+
+<body>
+  <h1>D3 graph of VA spending per veteran</h1>
+  <h3>Dollars per Vet</h3>
+  <div id='chart1'></div>
+    <h3>Languages</h3>
+  <div id='chart2'></div>
+</body>
+
+<!-- That's it! -->
+
+
+
+<!-- JS for a first Visualization -->
+<script type='text/javascript'>
+    
+    // set up svg 
+    //
+    var height = 300;
+    var width = 800;
+    var margin = {top:10, right:0, bottom:30, left:50}
+    var svg = d3.select('#chart1').append('svg')  
+                .attr('width', width + margin.left +margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+
+
+
+    // Main function: callback inside of data loading function
+    // Notice: most of the logic is in the inside function
+    //
+
+    d3.csv('VA.csv', function(data){ 
+        data.forEach(function(d){
+            d.state = d.state;
+            d.year = +d.year;
+            d.amt = +d.vetamt;
+        });
+
+        // create rules for the image
+        //
+        var x = d3.scale.linear().range([margin.left, width]);
+        var y = d3.scale.linear().range([height, 0]);
+        var xAxis = d3.svg.axis().scale(x).orient('bottom');
+        var yAxis = d3.svg.axis().scale(y).orient('left');
+        
+        // map domains - this tells the svg how to map it's size to the domain
+        //
+        x.domain([2005,2015]);
+        y.domain([0,.75]);
+
+
+        // write axes
+        //
+        svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis)
+        .append("text")
+          .attr("class", "label")
+          .attr("x", width)
+          .attr("y", -6)
+          .style("text-anchor", "end")
+          .text("Year");
+
+        svg.append("g")
+          .attr("class", "y axis")
+          .attr("transform", "translate("+ margin.left + ",0)")
+          .call(yAxis)
+        .append("text")
+          .attr("class", "label")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 0)
+          .attr("dy", ".71em")
+          .style("text-anchor", "end")
+          .text("Amt per Vet");
+
+        // let's put a tooltip on as well
+        var tipData = '';
+
+        var tip = d3.tip()
+          .attr('class', 'd3-tip')
+          .html(function(d){
+            return '<strong>' + tipData + '</strong>'
+          })
+          .direction('ne');
+
+        function toolMove(){ return svg.call(tip);};
+
+        function writeTip(){
+
+          return toolMove()
+        }
+
+        // Now actually push the data to the DOM (webpage)
+        svg.selectAll('.dot')
+            .data(data)
+            .enter()
+            .append('circle')
+            .attr('class', 'dot')
+            .attr('r', 5)
+            .attr('cx', function(d){return x(d.year);})
+            .attr('cy', function(d){return y(d.amt);})
+            .text(function(d){return d.state;})
+            .on("mousemove", tip.show)
+            .on("mouseout", tip.hide )
+            .on('mouseover', function(d){
+              tipData = d.state;
+              return toolMove();
+            })
+            .style('fill', 'blue');
+    });
+
+</script>
+

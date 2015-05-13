@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<head>
+  <title>US VA Spend Data by state using D3</title>
+
+  <!--- *********************************************************
+        *********************************************************
+
+        Borrowing code from examp
+
+        documentation at http://d3js.org/
+        
+        *********************************************************
+        ********************************************************* -->
+
+
+
+<!--- Using d3 for visualization -->
+<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="http://d3js.org/topojson.v1.min.js"></script>
+<script type='text/javascript' src='selectable.js'></script>
+<script type="text/javascript" src="d3.tip.min.js"></script>
+</head>
+
+
+
+<!--Webpage-->
+
+<body>
+  <h1>D3 graph of VA spending per veteran</h1>
+  <h3>Dollars per Vet</h3>
+  <div id='chart1'></div>
+</body>
+
+
+
+
+<!-- JS for a first Visualization -->
+<script type='text/javascript'>
+    
+    // set up svg 
+    //
+    var height = 300;
+    var width = 850;
+    var margin = {top:10, right:0, bottom:10, left:100}
+    var svg = d3.select('#chart1').append('svg')  
+                .attr('width', width + margin.left +margin.right)
+                .attr('height', height + margin.top + margin.bottom)
+                .append('g')
+
+
+
+    // Main function:
+    //
+
+    d3.csv('VA.csv', function(data){ 
+        data.forEach(function(d){
+            d.state = d.state;
+            d.vets = +d.vetpop;
+            d.amount = +d.totalexp;
+	    d.year = +d.year;
+	    d.lab = d.year +" "+ d.state
+	    
+        });
+
+        // define graph
+        //
+        var x = d3.scale.linear().range([margin.left, width]);
+        var y = d3.scale.linear().range([height, 0]);
+	//var color = d3.scale.category20();
+        var xAxis = d3.svg.axis().scale(x).orient('bottom');
+        var yAxis = d3.svg.axis().scale(y).orient('left');
+        
+	//color scales based on year
+	var color = d3.scale.linear()
+    		.domain([2005, 2013])
+    		.range(["red", "white", "green"]);
+
+		
+        // map domains 
+        //
+        x.domain([8000,2300000]);
+        y.domain([40000,13000000]);
+
+
+        // write axes
+        //
+        svg.append("g")
+          .attr("class", "x axis")
+          .attr("transform", "translate(0," + height + ")")
+          .call(xAxis)
+	  .append("text")
+          .attr("class", "label")
+          .attr("x", width)
+          .attr("y", -6)
+          .style("text-anchor", "end")
+          .text("Veteran Population");
+
+        svg.append("g")
+          .attr("class", "y axis")
+          .attr("transform", "translate("+ margin.left + ",0)")
+          .call(yAxis)
+          .append("text")
+          .attr("class", "label")
+          .attr("transform", "rotate(-90)")
+          .attr("y", 0)
+          .attr("dy", ".71em")
+          .style("text-anchor", "end")
+          .text("Total Expenditures");
+
+	// legend
+	
+	svg.append("g")
+  		.attr("class","legend")
+  		.attr("transform","translate(50,30)")
+  		.style("font-size","12px")
+  		.call(d3.legend)
+	
+		
+        // tooltip
+        var tipData = '';
+
+        var tip = d3.tip()
+          .attr('class', 'd3-tip')
+          .html(function(d){
+            return '<strong>' + tipData + '</strong>'
+          })
+          .direction('ne');
+
+        function toolMove(){ return svg.call(tip);};
+
+        function writeTip(){
+
+          return toolMove()
+        }
+
+        //push the data to the DOM (webpage)
+        svg.selectAll('.dot')
+            .data(data)
+            .enter()
+            .append('circle')
+            .attr('class', 'dot')
+            .attr('r', 5)
+            .attr('cx', function(d){return x(d.vets);})
+            .attr('cy', function(d){return y(d.amount);})
+            .text(function(d){return d.lab;})
+            .on("mousemove", tip.show)
+            .on("mouseout", tip.hide )
+            .on('mouseover', function(d){
+              tipData = d.lab;
+              return toolMove();
+            })
+       	    .style("fill", function(d) { return color(d.year); });
+    });
+
+</script>
+
