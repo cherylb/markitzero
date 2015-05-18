@@ -19,6 +19,7 @@
 <script type="text/javascript" src="http://d3js.org/topojson.v1.min.js"></script>
 <script type='text/javascript' src='selectable.js'></script>
 <script type="text/javascript" src="d3.tip.min.js"></script>
+<script type="text/javascript" src="https://raw.github.com/cherylb/markitzero/master/Lecture6 D3/VA.csv"></script>
 </head>
 
 
@@ -59,7 +60,6 @@
             d.amount = +d.totalexp;
 	    d.year = +d.year;
 	    d.lab = d.year +" "+ d.state
-	    
         });
 
         // define graph
@@ -70,10 +70,10 @@
         var xAxis = d3.svg.axis().scale(x).orient('bottom');
         var yAxis = d3.svg.axis().scale(y).orient('left');
         
-	//color scales based on year
+	//with color scales based on year (intersting?)
 	var color = d3.scale.linear()
     		.domain([2005, 2013])
-    		.range(["red", "white", "green"]);
+    		.range(["red", "pink"]);
 
 		
         // map domains 
@@ -106,15 +106,6 @@
           .attr("dy", ".71em")
           .style("text-anchor", "end")
           .text("Total Expenditures");
-
-	// legend
-	
-	svg.append("g")
-  		.attr("class","legend")
-  		.attr("transform","translate(50,30)")
-  		.style("font-size","12px")
-  		.call(d3.legend)
-	
 		
         // tooltip
         var tipData = '';
