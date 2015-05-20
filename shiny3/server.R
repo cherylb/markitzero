@@ -24,7 +24,7 @@ df$State <- sapply(df$State,str_trim)
 
 df$MedicalGeneral <- df$medcare + df$genopex
 df$OtherExpense <- df$insur + df$const + df$loan
-df$AmtperVet <- df$TotalExpense/df$NumOfVetrans
+df$AmtperVet <- df$TotalExpense/df$NumOfVeterans
 
 df <- df[c(2,3,4,5,6,8,13,15,16,17)]
 
@@ -41,7 +41,7 @@ addtot <- dfvadata%>%group_by(Year, Description) %>%
 
 addtot$Value[addtot$Description=="TotAmountperVet"] = 
   addtot$Value[addtot$Description =="TotalExpense"]/
-  addtot$Value[addtot$Description== "NumOfVetrans"]
+  addtot$Value[addtot$Description== "NumOfVeterans"]
                 
 dfvadata <- rbind(dfvadata,addtot[c(4,1,2,3)])
 dfvadata <- dfvadata%>% replace(is.na(.), 0)
@@ -54,7 +54,7 @@ dfvadata$Description <- as.character(dfvadata$Description)
 shinyServer(function(input,output){
   
   formulaText <- reactive({
-    paste(input$Type, " - ", input$Geo, " Data" )
+    paste(input$Type, " By Selected State(s)" )
   })
   
   output$caption <- renderText({
@@ -76,7 +76,7 @@ shinyServer(function(input,output){
   
   numvets <- function(dfvadata){
     #flter data for selection
-    type <- "NumOfVeterns"
+    type <- "NumOfVeterans"
     state <- input$Geo
     
     dfpt <-dfvadata%>%filter(Description == type, State %in% state)%>%
@@ -86,6 +86,24 @@ shinyServer(function(input,output){
     print(head(dfpt))
     return(dfpt)
   }
+
+  distr <- function(dfvadata){
+    #flter data for selection
+    type <- "NumOfVeterans"
+    state <- input$Geo
+
+    dfpt <-dfvadata%>%filter(State %in% state, State != "National", Description != "NumOfVeterans",
+                             Description != "TotalExpense", Description != "AmtperVet",
+                             Description != "NumofPatients")%>%
+      mutate(xYear = as.numeric(Year))%>%select(xYear,Description,Value)%>% group_by(Description,xYear)%>%
+      summarize(Value = sum(Value))
+      w_dfpt <- cast(dfpt, xYear ~ Description, value = c('Value'), fun = sum)
+    
+    print(head(w_dfpt))
+    return(w_dfpt)
+  }
+  
+  dfstepped <- distr(dfvadata)
   
   
 
@@ -103,17 +121,31 @@ shinyServer(function(input,output){
       "nonSelectedAlpha":0.4,"playDuration":10000}
   '
   
-  bubble <- gvisMotionChart(org(dfvadata), idvar = "State", timevar="Year", 
-                            yvar= "Value",
-                            options = list( state= ststr))
-  lines <-gvisLineChart(org(dfvadata), xvar="Year", yvar="Value", 
-                        options = list(title="Veteran Population 1999 - 2013",
-                                       vAxis="{title: 'Bounce Rate %'}",
-                                       width=500, height=300,
-                                       legend = 'none'))
-  output$dplot <- renderGvis({
-    gvisMotionChart(org(dfvadata), idvar = "State", timevar="Year", 
-                    yvar= "Value",
-                    options = list( state= ststr))
+  
+  
+  
+  
+  output$dash <- renderGvis({
+    
+    bubble <- gvisMotionChart(org(dfvadata), idvar = "State", timevar="Year", 
+                              yvar= "Value",
+                              options = list( state= ststr),
+                              width = 400, height = 400)
+    
+    lines <-gvisLineChart(numvets(dfvadata), xvar="Year", yvar="Value", 
+                          options = list(title="Veteran Population 1999 - 2013",
+                                         vAxis="{title: 'Number of Veterans'}",
+                                         width= 200, height=200,
+                                         legend = 'none'))
+    steps <- gvisSteppedAreaChart(dfstepped,xvar="xYear",
+                                  names(dfstepped[2:5]),
+                                  options=list(isStacked='relative', 
+                                               width=200, height=500))
+    lineandstep <- gvismerge(lines,steps,horizontal = FALSE)
+    
+    allcharts <- gvismerge(lineandstep, bubble, horizontal = TRUE)
+    # plot al
+    allcharts
+    
   })
 })

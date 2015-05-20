@@ -18,7 +18,7 @@ df$State <- as.character(df$State)
 df$State <- sapply(df$State,str_trim)
 df$MedicalGeneral <- df$medcare + df$genopex
 df$OtherExpense <- df$insur + df$const + df$loan
-df$AmtperVet <- df$TotalExpense/df$NumOfVetrans
+df$AmtperVet <- df$TotalExpense/df$NumOfVeterans
 
 df <- df[c(2,3,4,5,6,8,13,15,16,17)]
 dfvadata <- melt(df, id=c("State","Year"))
@@ -41,31 +41,36 @@ names(selecttype) <- x
 y <- unlist(selectgeo)
 names(selectgeo) <- y
 
-# UI for vetrans detail
-shinyUI(fluidPage(
+# UI for Veterans detail
+
+
+shinyUI(pageWithSidebar(
   
-  # title
-  h3(headerPanel("VA Expenditures by State ($'s in 1000's)")),
+  headerPanel("VA Expenditures by Selected State(s) ($'s in 1000's)"),
   
-  h4(textOutput("caption")),
-  
-  tableOutput("dplot"),
-  
-  hr(),
-  #select option
-  fluidRow(
-    column(3,
-           selectInput("Type", "Type: ", selecttype, 
-                selected = "AmtperVet")
-      ),
+  sidebarPanel(
     
-    column(4,
-           checkboxGroupInput("Geo", 
+    h4("Select Options"),
+    selectInput("Type", "Type: ", selecttype, 
+                selected = "AmtperVet"),
+    br(),
+    checkboxGroupInput("Geo", 
                        label = h3("Select States"), 
                        choices = selectgeo,
-                       selected = "National")
+                       selected = "National"),
+    br(),
+    
+    helpText(p(("This Shiny app simulates a Web Analytics Dashboard. The objective of 
+                       a dashboard is to display the"),strong("current status of key web metrics"), 
+               ("and arrange it on a single view so the information can be monitored 
+             at a glance.")), 
+             width= 3)
+  ),
   
-      )
+  mainPanel(
+    googleChartsInit(),
+
+    tableOutput("dash")
     )
   )
 )
