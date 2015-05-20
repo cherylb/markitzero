@@ -13,7 +13,7 @@ require(reshape)
 ###
 
 fromexcel <- function(){
-  filepath <- "C:/Users/Cheryl/Documents/GitHub/markitzero/"
+  filepath <- "C:/Users/Cheryl/Documents/GitHub/markitzero/VAdataraw/"
   sheetname <- "State Level Expenditures"
   sheetname2 <- "State Leve Expenditures"
   
@@ -212,7 +212,7 @@ fromexcel <- function(){
 }
 
 inflation<- function(dfall){
-  filepath <- "C:/Users/Cheryl/Documents/GitHub/markitzero/"
+  filepath <- "C:/Users/Cheryl/Documents/GitHub/markitzero/VAdataraw/"
   sheetname <- "BLS"
   
   filename <- "Inflation Rates.xlsx"
@@ -227,7 +227,7 @@ inflation<- function(dfall){
 
 
 dfall <- fromexcel()
-names(dfall) <- c("State", "NumOfVetrans", "TotalExpense", 
+names(dfall) <- c("State", "NumOfVeterans", "TotalExpense", 
                   "Compensation", "const", "Education","loan",
                   "genopex", "insur", "medcare", "NumofPatients","Year")
 dfbackup <- dfall
@@ -238,28 +238,7 @@ write.csv(dfall, "markitzero/VA.csv")
 
 
 
-# reshape data
-dfall$MedicalandOther <- dfall$medcare + dfall$genopex
-dfall$otherexp <- dfall$insur + dfall$const + dfall$loan
-dfall <- dfall%>%select(year,state,vetpop,totalexp,comp,educ,med.genopex,otherexp)
-                        insur,med.genopex)
-
-dfvadata <- melt(dfall, id=c("state","year"))
-names <- c(state, year, description, value)
-
 # save externally
 
 
-dfbyyear <- dfplot %>%group_by(year) %>% 
-  summarise(totalpop = sum(vetpop), totalpat =sum(uniqpat),
-            totalamt =sum(totalexp), vetamt =totalamt/totalpop, medamt = sum(medcare),
-            totpat = sum(uniqpat), totopex = sum(genopex), 
-            medopamt = totopex + medamt, totedu = sum(educ))
-
-ggplot(data = dfbyyear, aes(x = year, y = vetamt)) + 
-  geom_point() + geom_point(aes(x = year, y = medopamt))+
-  geom_point(aes(x = year, y = medamt))
-                                           
-# picture
-ggpairs (dfplot, columns = 2:5)
-
+d

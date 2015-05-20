@@ -29,13 +29,23 @@ dfvadata <- dfvadata%>%filter(State != 0, Value != 0)
 dfvadata$State <- as.character(dfvadata$State)
 dfvadata$Description <- as.character(dfvadata$Description)
 
-#'''''''''''''''''''''''''''''''''''''''''''''
+# Add national total
+addtot <- dfvadata%>%group_by(Year, Description) %>% 
+  summarise(Value = sum(Value))%>%
+  mutate(State = "National")
 
+addtot$Value[addtot$Description=="TotAmountperVet"] = 
+  addtot$Value[addtot$Description =="TotalExpense"]/
+  addtot$Value[addtot$Description== "NumOfVeterans"]
+
+dfvadata <- rbind(dfvadata,addtot[c(4,1,2,3)])
+dfvadata <- dfvadata%>% replace(is.na(.), 0)
 #'''''''''''''''''''''''''''''''''''''''''''''
 # set up UI options
 
 selecttype <- as.list(sort(unique(dfvadata$Description)))
 selectgeo <- as.list(c("National",sort(unique(dfvadata$State))))
+
 x <- unlist(selecttype)
 names(selecttype) <- x
 y <- unlist(selectgeo)
@@ -49,29 +59,27 @@ shinyUI(pageWithSidebar(
   headerPanel("VA Expenditures by Selected State(s) ($'s in 1000's)"),
   
   sidebarPanel(
-    
-    h4("Select Options"),
-    selectInput("Type", "Type: ", 
-                selecttype, 
+  
+    selectInput("Type", label = h4("Measure: "), 
+                choices = selecttype, 
                 selected = "AmtperVet"),
-    br(),
+
     checkboxGroupInput("Geo", 
-                       label = h3("Select States"), 
+                       label = h4("Select States"), 
                        choices = selectgeo,
-                       selected = "National"),
-    br(),
-    
-    helpText(p(("This Shiny app simulates a Web Analytics Dashboard. The objective of 
-                       a dashboard is to display the"),strong("current status of key web metrics"), 
-               ("and arrange it on a single view so the information can be monitored 
-             at a glance.")), 
-             width= 3)
+                       selected = "National")
+#     br(),
+#     
+#     helpText(p(("This Shiny app simulates a Web Analytics Dashboard. The objective of 
+#                        a dashboard is to display the"),strong("current status of key web metrics"), 
+#                ("and arrange it on a single view so the information can be monitored 
+#              at a glance.")), 
+#              width= 3)
   ),
   
   mainPanel(
-   # googleChartsInit(),
-
-    htmlOutput("dash")
+    h4(textOutput("caption")),
+    tableOutput("dash")
     )
   )
 )
