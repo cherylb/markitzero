@@ -1,13 +1,11 @@
 require(XLConnect)
-require(ggplot2)
-require(GGally)
 require(dplyr)
 require(reshape)
 
 #### Collect Data
 # Notes about the data: most data is pulled from a series of excel data files
 # compiled by the US VA and available here: http://www.va.gov/vetdata/Expenditures.asp
-# the excel data was in a semi-consitent format,which evolved over time
+# the excel data was in a semi-regular format,which evolved over time
 # Missing population data for 2000 was found using the US 2000 Cenus data 
 # state codes from data set Decennial/Summary File 3/2000/Summary File 3
 ###
@@ -224,8 +222,6 @@ inflation<- function(dfall){
   return(dfall2)
 }
 
-
-
 dfall <- fromexcel()
 names(dfall) <- c("State", "NumOfVeterans", "TotalExpense", 
                   "Compensation", "const", "Education","loan",
@@ -234,11 +230,40 @@ dfbackup <- dfall
 dfall <- dfall %>% replace(is.na(.), 0)
 dfall <- inflation(dfall)
 dfall <- dfall %>% replace(is.na(.), 0)
-write.csv(dfall, "markitzero/VA.csv")
+
+#'''''''''''''''''''''''''''''''''''''''''''''
+# Reshape data
+dfall$State <- as.character(dfall$State)
+dfall$State <- sapply(dfall$State,str_trim)
+
+dfall$MedicalGeneral <- dfall$medcare + dfall$genopex
+dfall$OtherExpense <- dfall$insur + dfall$const + dfall$loan
+dfall$AmtperVet <- dfall$TotalExpense/dfall$NumOfVeterans
+
+dfall <- dfall[c(1,2,3,4,5,7,12,14,15,16)]
+
+dfvadata <- melt(dfall, id=c("State","Year"))
+names <- c("State", "Year", "Description", "Value")
+names(dfvadata) <- names
+dfvadata <- dfvadata%>%filter(State != 0, Value != 0)
+
+dfvadata$State <- as.character(dfvadata$State)
+dfvadata$Description <- as.character(dfvadata$Description)
+
+# Add national total
+addtot <- dfvadata%>%group_by(Year, Description) %>% 
+  summarise(Value = sum(Value))%>%
+  mutate(State = "National")
+
+addtot$Value[addtot$Description=="AmtperVet"] = 
+  addtot$Value[addtot$Description =="TotalExpense"]/
+  addtot$Value[addtot$Description== "NumOfVeterans"]
+
+dfvadata <- rbind(dfvadata,addtot[c(4,1,2,3)])
+dfvadata <- dfvadata%>% replace(is.na(.), 0)
 
 
 
 # save externally
+write.csv(dfall, "markitzero/VA.csv")
 
-
-d
