@@ -12,38 +12,8 @@ ghub <- "https://raw.githubusercontent.com/cherylb/markitzero/master/"
 fileurl <- 
   paste(ghub,"VA.csv", sep ="")
 data <- getURL(fileurl)
-df <- read.csv(text = data, stringsAsFactors = FALSE)
+dfvadata <- read.csv(text = data, stringsAsFactors = FALSE)
 
-# #'''''''''''''''''''''''''''''''''''''''''''''
-# # Reshape data
-# df$State <- as.character(df$State)
-# df$State <- sapply(df$State,str_trim)
-# 
-# df$MedicalGeneral <- df$medcare + df$genopex
-# df$OtherExpense <- df$insur + df$const + df$loan
-# df$AmtperVet <- df$TotalExpense/df$NumOfVeterans
-# 
-# df <- df[c(2,3,4,5,6,8,13,15,16,17)]
-# 
-# dfvadata <- melt(df, id=c("State","Year"))
-# names <- c("State", "Year", "Description", "Value")
-# names(dfvadata) <- names
-# dfvadata <- dfvadata%>%filter(State != 0, Value != 0)
-# 
-# dfvadata$State <- as.character(dfvadata$State)
-# dfvadata$Description <- as.character(dfvadata$Description)
-# 
-# # Add national total
-# addtot <- dfvadata%>%group_by(Year, Description) %>% 
-#   summarise(Value = sum(Value))%>%
-#   mutate(State = "National")
-# 
-# addtot$Value[addtot$Description=="AmtperVet"] = 
-#   addtot$Value[addtot$Description =="TotalExpense"]/
-#   addtot$Value[addtot$Description== "NumOfVeterans"]
-# 
-# dfvadata <- rbind(dfvadata,addtot[c(4,1,2,3)])
-# dfvadata <- dfvadata%>% replace(is.na(.), 0)
 
 
 #''''''''''''''''''''
@@ -87,7 +57,7 @@ shinyServer(function(input,output){
       dfstep <- dfstep%>%select(Year,OtherExpense,
                              Education,Compensation,MedicalGeneral)
    
-      notstate <- c("DC", "District of Columbia", 
+      notstate <- c("DC", "District of Columbia","District Of Columbia", 
                     "National", "Guam", "Puerto Rico")
       dfmap <-  subset(dfvadata, !(State %in% notstate))%>%
      filter(Description == "AmtperVet")%>%

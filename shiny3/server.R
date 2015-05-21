@@ -82,43 +82,43 @@ shinyServer(function(input,output){
     return(dfpt)
     
   }
+
+  state <- reactive({
+    state <- input$Geo
+  })
+  print(state)
   
-#   state <- reactive({
-#     state <- input$Geo
-#   })
-#   print(state)
-#   
-#   numvets <- function(dfvadata){
-#     #flter data for selection
-#     type <- "NumOfVeterans"
-#   
-#     dfpt <-dfvadata%>%filter(Description == type, State %in% state)%>%
-#       arrange(State, Value)%>%mutate(xYear = as.numeric(Year))%>%
-#       select(State,Year,xYear, Value, Description)
-#     
-#     print(head(dfpt))
-#     return(dfpt)
-#   }
-# 
-#   distr <- function(dfvadata){
-#     #flter data for selection
-#     state <- reactive({
-#       state <- input$Geo
-#     })
-#   
-#     dfpt <-dfvadata%>%filter(State %in% state, State != "National", Description != "NumOfVeterans",
-#                              Description != "TotalExpense", Description != "AmtperVet",
-#                              Description != "NumofPatients")%>%
-#       mutate(xYear = as.numeric(Year))%>%select(xYear,Description,Value)%>% group_by(Description,xYear)%>%
-#       summarize(Value = sum(Value))
-#       w_dfpt <- cast(dfpt, xYear ~ Description, value = c('Value'), fun = sum)
-#     
-#     print(head(w_dfpt))
-#     return(w_dfpt)
-#   }
-#   
-#   dfstepped <- distr(dfvadata)
+  numvets <- function(dfvadata){
+    #flter data for selection
+    type <- "NumOfVeterans"
   
+    dfpt <-dfvadata%>%filter(Description == type, State %in% state)%>%
+      arrange(State, Value)%>%mutate(xYear = as.numeric(Year))%>%
+      select(State,Year,xYear, Value, Description)
+    
+    print(head(dfpt))
+    return(dfpt)
+  }
+
+  distr <- function(dfvadata){
+    #flter data for selection
+    state <- reactive({
+      state <- input$Geo
+    })
+  
+    dfpt <-dfvadata%>%filter(State %in% state, State != "National", Description != "NumOfVeterans",
+                             Description != "TotalExpense", Description != "AmtperVet",
+                             Description != "NumofPatients")%>%
+      mutate(xYear = as.numeric(Year))%>%select(xYear,Description,Value)%>% group_by(Description,xYear)%>%
+      summarize(Value = sum(Value))
+      w_dfpt <- cast(dfpt, xYear ~ Description, value = c('Value'), fun = sum)
+    
+    print(head(w_dfpt))
+    return(w_dfpt)
+  }
+  
+  dfstepped <- distr(dfvadata)
+
   ststr <- '
     {"xZoomedDataMax":2013,"yLambda":1,"iconType":"BUBBLE",
      "xAxisOption":"2","uniColorForNonSelected":false,
@@ -139,18 +139,18 @@ shinyServer(function(input,output){
                               options = list( state= ststr))
                               #width = 400, height = 400))
     
-  #lines <-gvisLineChart(numvets(dfvadata), xvar="Year", yvar="Value", 
-                        #  options = list(title="Veteran Population 1999 - 2013",
-                         #                vAxis="{title: 'Number of Veterans'}",
-                          #               width= 200, height=200,
-                           #              legend = 'none'))
-  #steps <- gvisSteppedAreaChart(dfstepped,xvar="xYear",
-                            #      names(dfstepped[2:5]),
-                             #     options=list(isStacked='relative', 
-                              #                 width=200, height=500))
-  #lineandstep <- gvismerge(lines,steps,horizontal = FALSE)
+  lines <-gvisLineChart(numvets(dfvadata), xvar="Year", yvar="Value", 
+                         options = list(title="Veteran Population 1999 - 2013",
+                                        vAxis="{title: 'Number of Veterans'}",
+                                        width= 200, height=200,
+                                        legend = 'none'))
+  steps <- gvisSteppedAreaChart(dfstepped,xvar="xYear",
+                                 names(dfstepped[2:5]),
+                                 options=list(isStacked='relative', 
+                                              width=200, height=500))
+  lineandstep <- gvismerge(lines,steps,horizontal = FALSE)
     
-  #allcharts <- gvismerge(lineandstep, bubble, horizontal = TRUE)
+  allcharts <- gvismerge(lineandstep, bubble, horizontal = TRUE)
   
   
     

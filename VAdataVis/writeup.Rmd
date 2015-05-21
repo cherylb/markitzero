@@ -1,0 +1,39 @@
+
+## United States Veterans Administration Yearly Expense Analysis
+**1999 - 2013**
+
+The goal of this project is to provide a high-level overview of spending on United States Veterans and both the state and national level. The 14-year period spans a marked decrease in the number of living WWII and Korean War veterans as well as the beginning and ending of two new wars. The amount of VA expenditures for this period, combined with VA population counts, creates visibility into the long-term impact of war and the changing needs of veterans.  
+
+ The increasing expense trend over time demonstrates the rising ongoing financial impact of war. This is not often obvious in discussions of military budgets, but has a real and long-term impact.  Additionally, the analysis demonstrates the changing way the United States provides for our veterans, with dramatically increasing amounts spent on medical care, compensation, and education benefits per veteran.  Despite the overall decrease in veterans, the type of veteran and the needs of the veteran population may be changing, possibly demonstrated by a 500% increase in educational benefits since 1999. The variability in state-to-state comparison of spend per veteran indicates some parts of the country may be providing better access to benefits.
+
+
+### Data Sources and Methods
+Data sources for this project are publicly available U.S. government sources. Links are provided below.
+
+**VA Expenses**
+Yearly VA expenditures provided by the U.S. Department of Veterans Affairs as a collection of Excel reports, one for each year from 1999 to 2013. The reports had fairly consistent fields from year to year. Inconsistencies were manually adjusted in the final data set used.
+
+  * Some years broke out the Medical and General Operating categories, in other years they were grouped together. The final data set contains these two categories grouped as "MedicalGeneral"
+  * One year (2000) did not contain veteran population information. This data was manually updated using data from the U.S. Census Bureau
+  * Some state names were adjusted for consistency across years
+  * New York values were manually adjusted for 2000 to correct formula errors in original reporting
+  * Several earlier years did not contain a summary report for all states. The summary was created manually for upload into R.
+  
+**Adjusted to 2013 Dollars**
+All dollar amounts are in 1,000's and have been inflation adjusted to 2013 dollars.  Adjustment was made using the annual inflation rate calculated from the national Consumer Price Index provided by the Bureau of Labor Statistics
+
+**Data Consolidation**
+Adjusted reports were imported into an R data frame using a function named, which is included but commented out in the R code. Resulting data set was saved as VA.csv and used for subsequent analysis.
+
+**links to data**
+
+  * Consolidated Data Table - feeds the shiny App
+  + https://github.com/cherylb/markitzero/VA.csv
+
+  * Individual adjusted data tables: 
+  + https://github.com/cherylb/markitzero/tree/master/VAdataraw
+
+  * Original data sources:
+  + 1999-2013 VA Expenses:  http://www.va.gov/vetdata/Expenditures.asp
+  + 2000 veteran population:  http://www.census.gov/en.html  - Data Ferret Query
+	+ 1999-2013 Consumer Price Index:  http://www.bls.gov/data/#prices

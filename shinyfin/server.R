@@ -38,7 +38,7 @@ addtot <- dfvadata%>%group_by(Year, Description) %>%
   summarise(Value = sum(Value))%>%
   mutate(State = "National")
 
-addtot$Value[addtot$Description=="TotAmountperVet"] = 
+addtot$Value[addtot$Description=="AmtperVet"] = 
   addtot$Value[addtot$Description =="TotalExpense"]/
   addtot$Value[addtot$Description== "NumOfVeterans"]
 
